@@ -1,27 +1,28 @@
-import React from 'react'
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useDispatch } from 'react-redux'
-import { deleteTodo, toggleComplete } from '../stores/todoList';
+import { deleteTodo, seeAll, toggleComplete, changeTodoChanging, changeTodoValue } from '../stores/todoList';
 
 
 function Main() {
 
-    const todos = useSelector((state) => state.todoList);
-
-
-
+    const filterArr = useSelector((state) => state.todoList.filterArr);
+    const mainArr = useSelector((state) => state.todoList.mainArr);
     const dispatch = useDispatch();
+    const [text, setText] = useState('');
+
+
+
+    useEffect(() => {
+        dispatch(seeAll())
+        console.log(filterArr)
+    }, [mainArr])
 
     const handleCompleteClick = (id) => {
-
-        console.log("handleCompleteClick")
-
         dispatch(
-
             toggleComplete({ id: id })
-
         )
-
     }
 
     const handleDeleteTodo = (id) => {
@@ -33,6 +34,23 @@ function Main() {
         )
     }
 
+    const handleChangeTodo = (id, title) => {
+
+
+        dispatch(changeTodoChanging({ id }))
+        setText(title)
+
+
+    }
+
+    const handleSubmit = (e) => {
+
+        e.preventDefault();
+        dispatch(changeTodoValue(text))
+    }
+
+
+
     return (
         <div>
 
@@ -43,18 +61,27 @@ function Main() {
             </label>
 
             <ul className="todo-list">
-
                 {
 
-                    todos.map((todo, index) => (
-
-
+                    filterArr.map((todo, index) => (
                         <li key={index} className={todo.completed ? "completed" : null}>
-                            <div >
-                                <input className="toggle" type="checkbox" onChange={() => handleCompleteClick(todo.id)} checked={todo.completed} />
-                                <label>{todo.title}</label>
-                                <button className="destroy" onClick={() => handleDeleteTodo(todo.id)}></button>
-                            </div>
+                            {!todo.isChanging ?
+                                (
+                                    <div>
+                                        <input className="toggle" type="checkbox" onChange={() => handleCompleteClick(todo.id)} checked={todo.completed} />
+                                        <label onClick={() => handleChangeTodo(todo.id, todo.title)}>{todo.title}</label>
+                                        <button className="destroy" onClick={() => handleDeleteTodo(todo.id)}></button>
+                                    </div>
+                                )
+                                :
+                                (
+                                    <form onSubmit={(e) => handleSubmit(e)}>
+                                        <input autoFocus className='new-todo' onChange={(e) => setText(e.target.value)} value={text} />
+                                    </form>
+                                )
+
+                            }
+
                         </li>
 
                     ))

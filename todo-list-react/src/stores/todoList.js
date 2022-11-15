@@ -4,106 +4,100 @@ export const todoList = createSlice({
 
     name: "todos",
 
-    initialState:
-        [
-
+    initialState: {
+        mainArr: [
             {
                 id: 1,
                 title: "todo1",
                 completed: false,
-
+                isChanging: false
             },
 
             {
                 id: 2,
                 title: "todo2",
                 completed: false,
-
+                isChanging: false
             },
 
             {
                 id: 3,
                 title: "todo3",
                 completed: false,
-
+                isChanging: false
             }
-
-
-
-        ]
+        ],
+        filterArr: [],
+        filterType: 'all'
+    }
     ,
 
     reducers: {
         addTodo: (state, action) => {
-
             const newTodo = {
-
                 id: Date.now(),
                 title: action.payload.title,
-                completed: false
+                completed: false,
+                isChanging: false
             };
 
-            state.push(newTodo)
-
-
+            state.mainArr.push(newTodo)
         },
 
         toggleComplete: (state, action) => {
+            const index = state.mainArr.findIndex((todo) => todo.id === action.payload.id);
+            state.mainArr[index].completed = !state.mainArr[index].completed;
+        },
+
+        deleteTodo: (state, action) => {
+            state.mainArr = state.mainArr.filter((todo) => todo.id !== action.payload.id);
+        },
+
+        changeTodoChanging: (state, action) => {
+            const index = state.mainArr.findIndex((todo) => todo.id === action.payload.id);
+            state.mainArr.forEach(x => x.isChanging = false)
+            state.mainArr[index].isChanging = true;
+        },
+
+        changeTodoValue: (state, action) => {
+
+            const changedTodo = state.mainArr.filter((todo) => todo.isChanging === true);
+
+            changedTodo.title = action.payload.title
 
 
-            const index = state.findIndex((todo) => todo.id === action.payload.id);
 
+            const index = state.mainArr.findIndex((todo) => todo.isChanging);
 
-            state[index].completed = !state[index].completed
+            state.mainArr[index].title = action.payload
 
-
-
+            console.log(action);
 
         },
 
-
-
-        deleteTodo: (state, action) => {
-
-            return state.filter((todo) => todo.id !== action.payload.id)
-        }
-        ,
-
-
         clearCompleted: (state) => {
-
-            return state.filter((todo) => todo.completed !== true)
+            state.mainArr = state.mainArr.filter((todo) => todo.completed !== true)
         },
 
         seeAll: (state) => {
-
-            const allTodos = state.filter((todo) => todo.completed !== true && todo.completed !== false)
-
-            return allTodos;
+            state.filterArr = state.mainArr;
+            state.filterType = 'all'
         },
 
         seeActive: (state) => {
-
-            const filteredActiveTodos = state.filter((todo) => todo.completed !== true)
-
-            return filteredActiveTodos;
+            state.filterArr = state.mainArr.filter((todo) => todo.completed !== true)
+            state.filterType = 'active'
         },
 
         seeCompleted: (state) => {
-
-            const filteredCompletedTodos = state.filter((todo) => todo.completed !== false)
-
-            return filteredCompletedTodos;
-        }
-
-
+            state.filterArr = state.mainArr.filter((todo) => todo.completed !== false)
+            state.filterType = 'completed'
+        },
 
 
     }
-
-
 })
 
-export const { addTodo, toggleComplete, deleteTodo, clearCompleted, seeAll, seeActive, seeCompleted } = todoList.actions;
+export const { addTodo, toggleComplete, deleteTodo, clearCompleted, seeAll, seeActive, seeCompleted, changeTodoChanging, changeTodoValue } = todoList.actions;
 
 export default todoList.reducer;
